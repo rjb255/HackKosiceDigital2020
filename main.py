@@ -1,25 +1,30 @@
-import random as rd
+import numpy as np
 import pandas as pd
 
 def shopDefine():
-  no_goods = 100
-  no_locations = 10
-  goodLocation = [rd.randrange(0,no_locations) for i in range(no_goods)]
-  goodQuantity = [rd.randrange(20,100) for i in range(no_goods)]
-  tot = [0 for i in range(no_locations)]
-  for i in range(no_goods):
-    tot[goodLocation[i]] = tot[goodLocation[i]] + goodQuantity[i]
-    
-  buffer = 5
-  Max = [tot[i] + buffer for i in range(no_locations)]
-  shopStock = pd.DataFrame({
-    "Item #":[i for i in range(no_goods)],
-    "Location":goodLocation,
-    "Quantity":goodQuantity,
-    "Timestamp":[0 for i in range(no_goods)],
-    "Reference":[2 for i in range(no_goods)],  # (0 for purchase, 1 for partial restock, 2 for full shop restock)
-    "Timestamp":[0 for i in range(no_goods)]
-  })
-  return shopStock,Max
+  num_goods = 100
+  num_locations = 10
 
-goodsLog, MaxSpace = shopDefine()
+  shopStock = pd.DataFrame({
+    "Location": np.random.randint(num_locations, size = num_goods),
+    "Quantity": np.random.randint(20, 100, num_goods),
+    "Timestamp": np.zeros(num_goods),
+    "Reference": np.full(num_goods, 2), # 0 = purchase, 1 = partial restock, 2 = full shop restock
+    "Timestamp": np.zeros(num_goods)
+  })
+
+  total = shopStock.groupby(["Location"]).apply(lambda x : sum(x["Quantity"])).values
+
+  buffer = 5
+  Max = total + buffer
+
+  return (shopStock, Max)
+
+if __name__ == "__main__":
+  goodsLog, MaxSpace = shopDefine()
+
+  print("\nGoods Log: ")
+  print(goodsLog)
+
+  print("\nMax Space: ")
+  print(MaxSpace)
